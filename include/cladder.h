@@ -20,4 +20,14 @@
 #ifndef _CLADDER_H
 #define _CLADDER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

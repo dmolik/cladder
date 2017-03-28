@@ -22,15 +22,19 @@ AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I build
 
 AM_CFLAGS = -Wall -Wextra -g -pedantic $(DEPS_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 core_headers :=
-core_headers +=
+core_headers += include/cladder.h
 
 core_src :=
-core_src +=
+core_src += src/main.c
 
+
+include_HEADERS = include/cladder.h
 cladder_SOURCES = $(core_headers) $(core_src)
-bin_PROGRAMS   = cladder
+cladder_LDADD   = -lmount
+bin_PROGRAMS    = cladder
 
 dist_man_MANS  =
 dist_man_MANS += man/cladder.8
