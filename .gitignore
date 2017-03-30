@@ -5,6 +5,7 @@ config.h.in
 configure
 
 Makefile
+!src/squashfs-tools/Makefile
 config.h
 config.log
 config.status
