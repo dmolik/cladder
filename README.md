@@ -9,12 +9,15 @@ A possible use is to download a source code repo and then build it, and throw aw
 
 ## Builing
 
-currently requires:
-  libmount (usually provided by util-linux)
-  pthread
-  liblz4
+Requirements
 
-compile:
-  ./bootstrap.sh
-  ./configure
-  make
+- libmount, usually provided by util-linux
+- pthread
+- lz4
+
+
+compiling
+
+    ./bootstrap.sh
+    ./configure
+    make
