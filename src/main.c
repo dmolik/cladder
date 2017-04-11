@@ -89,6 +89,8 @@ int main (int argc, char *argv[])
 	uid = pwd->pw_uid;
 	mkdir(".cladder", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
 	chown(".cladder", uid, -1);
+	mkdir(".cladder.sqsh", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
+	chown(".cladder.sqsh", uid, -1);
 
 	mnt_context_set_fstype(ctx, "tmpfs");
 	mnt_context_set_source(ctx, "tmpfs");
@@ -108,6 +110,21 @@ int main (int argc, char *argv[])
 	chown(".cladder/up",   uid, -1);
 	chown(".cladder/work", uid, -1);
 
+	char *squashed = malloc(64);
+	sprintf(squashed, "%s.sqsh", argv[1]);
+	squash(argv[1], squashed);
+	ctx = mnt_new_context();
+	if (!ctx) {
+		fprintf(stderr, "failed to allocate mount context\n");
+		exit(1);
+	}
+	mnt_context_set_fstype(ctx, "squashfs");
+	mnt_context_set_source(ctx, squashed);
+	mnt_context_set_target(ctx, ".cladder.sqsh");
+
+
+	rc = mnt_context_mount(ctx);
+	mnt_free_context(ctx);
 
 	ctx = mnt_new_context();
 	if (!ctx) {
@@ -121,10 +138,10 @@ int main (int argc, char *argv[])
 	chown(argv[2], uid, -1);
 
 	mnt_context_set_target(ctx, argv[2]);
-	char *lower = malloc(64);
-	sprintf(lower, "lowerdir=%s", argv[1]);
-	mnt_context_append_options(ctx, lower);
-	free(lower);
+	//char *lower = malloc(64);
+	//sprintf(lower, "lowerdir=%s", argv[1]);
+	mnt_context_append_options(ctx, "lowerdir=.cladder.sqsh");
+	//free(lower);
 	mnt_context_append_options(ctx, "upperdir=.cladder/up");
 	mnt_context_append_options(ctx, "workdir=.cladder/work");
 

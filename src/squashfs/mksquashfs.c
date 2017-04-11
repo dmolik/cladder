@@ -76,7 +76,7 @@
 #include "restore.h"
 #include "process_fragments.h"
 
-int delete = FALSE;
+int delete = TRUE;
 int fd;
 struct squashfs_super_block sBlk;
 
@@ -4372,6 +4372,8 @@ int squash(char *src, char *dst)
 	block_log = slog(block_size);
 	calculate_queue_sizes(total_mem, &readq, &fragq, &bwriteq, &fwriteq);
 
+	source_path = &src;
+	source = 1;
 
 	comp = lookup_compressor("lz4");
 	res = compressor_options_post(comp, block_size);
@@ -4384,6 +4386,7 @@ int squash(char *src, char *dst)
 		EXIT_MKSQUASHFS();
 	}
 
+	destination_file = dst;
 	if(stat(dst, &buf) == -1) {
 		if(errno == ENOENT) { /* Does not exist */
 			fd = open(dst, O_CREAT | O_TRUNC | O_RDWR,
