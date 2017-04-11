@@ -55,12 +55,21 @@ int main (int argc, char *argv[])
 		case 'h':
 		case '?':
 			printf("%s v%s\n", PACKAGE_NAME, PACKAGE_VERSION);
-			printf("Usage: %s [-h?V]\n",
+			printf("Usage: %s [-h?V] src dst\n",
 			         PACKAGE_NAME);
+
+			printf("Required:\n");
+			printf("  src     the source directory to turn into an archive\n");
+			printf("  dst     the destination directory to overlay mount tmpfs onto the archive\n");
 
 			printf("Options:\n");
 			printf("  -?, -h  show this help screen\n");
 			printf("  -V      display the version\n");
+
+			printf("Example:\n");
+			printf("  %s      test  writeable\n");
+
+			printf("\n");
 			exit(0);
 
 		case 'V':
@@ -70,6 +79,10 @@ int main (int argc, char *argv[])
 		}
 	}
 
+	if (argv[1] == NULL || argv[2] == NULL) {
+		printf("please provide a src and dst, see -? for more information\n");
+		exit(1);
+	}
 
 	mnt_init_debug(0);
 	ctx = mnt_new_context();

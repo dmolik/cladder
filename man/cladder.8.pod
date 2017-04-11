@@ -1,0 +1,38 @@
+=head1 NAME
+
+cladder - Turn a directory into a LZ4 archive and mount tmpfs over it
+
+=head1 SYNOPSIS
+
+B<cladder> src dst
+
+=head1 DESCRIPTION
+
+B<cladder> is an experimental mounting system for turning a directory into a
+squashfs archive and mounting tmpfs over it. Currently no data is lost in the
+process of making the directory into an archive or mounting tmpfs.
+
+Currently cladder is a proof of concept intented to make dependency projects
+easier to program.
+
+=head1 OPTIONS
+
+=over
+
+=item src
+
+The source directory to turn into a archive
+
+=item dst
+
+The target directory to mount the writable archive onto.
+
+=back
+
+=head1 SEE ALSO
+
+overlayfs, squashfs, mount, lz4
+
+=head1 AUTHORS
+
+Dan Molik I<< <dan@danmolik.com> >>
