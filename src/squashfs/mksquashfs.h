@@ -150,4 +150,6 @@ extern unsigned int get_uid(unsigned int);
 extern unsigned int get_guid(unsigned int);
 extern int read_bytes(int, void *, int);
 extern unsigned short get_checksum_mem(char *, int);
+
+int squash(char *src, char *dst);
 #endif

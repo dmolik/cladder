@@ -21,19 +21,32 @@
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I build
 
-AM_CFLAGS = -Wall -Wextra -g -pedantic $(DEPS_CFLAGS)
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CFLAGS = -Wall -Wextra -g -std=gnu99 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
+	-D_LARGEFILE_SOURCE -DCOMP_DEFAULT=\"lz4\" \
+	-DLZ4_SUPPORT -DXATTR_SUPPORT -DXATTR_DEFAULT $(DEPS_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/squashfs
 
 core_headers :=
 core_headers += include/cladder.h
+
+squashfs_src  = src/squashfs/squashfs_swap.h src/squashfs/squashfs_fs.h src/squashfs/swap.c
+squashfs_src += src/squashfs/caches-queues-lists.h src/squashfs/caches-queues-lists.c
+squashfs_src += src/squashfs/error.h src/squashfs/info.h src/squashfs/lz4_wrapper.h src/squashfs/mksquashfs.c
+squashfs_src += src/squashfs/process_fragments.c src/squashfs/pseudo.c  src/squashfs/read_file.c  src/squashfs/read_fs.h
+squashfs_src += src/squashfs/restore.c  src/squashfs/sort.c  src/squashfs/squashfs_compat.h src/squashfs/compressor.c
+
+squashfs_src += src/squashfs/mksquashfs.h src/squashfs/action.h src/squashfs/action.c  src/squashfs/compressor.h
+squashfs_src += src/squashfs/info.c   src/squashfs/lz4_wrapper.c src/squashfs/process_fragments.h
+squashfs_src += src/squashfs/pseudo.h  src/squashfs/read_fs.c src/squashfs/read_xattrs.c  src/squashfs/restore.h
+squashfs_src += src/squashfs/sort.h  src/squashfs/xattr.h src/squashfs/xattr.c
 
 core_src :=
 core_src += src/main.c
 
 
 include_HEADERS = include/cladder.h
-cladder_SOURCES = $(core_headers) $(core_src)
-cladder_LDADD   = -lmount
+cladder_SOURCES = $(core_headers) $(squashfs_src) $(core_src)
+cladder_LDADD   = -lmount -lpthread -lm -llz4
 bin_PROGRAMS    = cladder
 
 dist_man_MANS  =

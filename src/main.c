@@ -25,12 +25,14 @@
 #include <getopt.h>
 #include <pwd.h>
 #include <unistd.h>
-
+#include <dirent.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <libmount/libmount.h>
+#include "src/squashfs/squashfs_fs.h"
+#include "src/squashfs/mksquashfs.h"
 
 int main (int argc, char *argv[])
 {

@@ -7,6 +7,7 @@ configure
 Makefile
 !src/squashfs-tools/Makefile
 config.h
+config.h.in~
 config.log
 config.status
 stamp-h1
@@ -17,3 +18,6 @@ src/.dirstamp
 cladder
 man/cladder.8
 src/*.o
+src/squashfs/*.o
+src/squashfs/.deps/
+src/squashfs/.dirstamp
