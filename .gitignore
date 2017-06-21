@@ -17,7 +17,13 @@ src/.dirstamp
 
 cladder
 man/cladder.8
+
 src/*.o
+
 src/squashfs/*.o
 src/squashfs/.deps/
 src/squashfs/.dirstamp
+
+src/lz4/*.o
+src/lz4/.deps/
+src/lz4/.dirstamp

@@ -1,0 +1,34 @@
+= Dev Notes =
+
+== Goals ==
+
+Cladder has started as a test archival and read-readwrite test application. The idea being it's extremely easy to take a directory, archive it as a lz4 squashfs artifact and then mount a read-write tmpfs layer ontop to enable things like snapshoting or execution and remote commits.
+
+== Ideas ==
+
+ * [.] Version 1.0 release features
+  * [X] Move from libmount to POSIX mount
+  * [ ] Clean compiler warnings
+  * [X] LZ4 requires cmake which is too heavy weight in a Virtual Server environment (Linode)
+    * [X] Move LZ4 in repo
+    * [X] Clean up
+    * [X] Get mksquash to build with lz4 in dir
+  * [ ] Add container execution
+    * [ ] cleanup and test nspawn
+    * [ ] Ensure cgroups and namespacing enforcement
+    * [ ] work on network configuration
+      * [ ] veth
+      * [ ] bridge
+      * [ ] vxlan
+      * [ ] openvswitch
+      * [ ] virtio
+    * [ ] libcurl to pull down signed tarballs
+      * [ ] Verify gpg signature
+    * [ ] package manager
+  * [ ] Kubernetes integration
+  * [ ] Verify tool-chains in container (musl)
+  * [ ] Test converstion to initramfs and running on pure hardware
+
+Forking systemd-nspawn into the repo was the easier part, attempting to get it to build and modify the codebase quickly became unwieldly. I find in very amusing that musl is the libc of choice for projects like this. Given how absured the systemd code base is now. It's worse than glibc.
+
+Cladder is to systemd-nspawn as musl is to glibc. Reduce the attack surface and simplifiy the code based.

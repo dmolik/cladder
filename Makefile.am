@@ -29,6 +29,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/squashfs
 core_headers :=
 core_headers += include/cladder.h
 
+lz4_src   = src/lz4/lz4.h src/lz4/lz4.c
+lz4hc_src = $(lz4_src) src/lz4/lz4opt.h src/lz4/lz4hc.h src/lz4/lz4hc.c
+
 squashfs_src  = src/squashfs/squashfs_swap.h src/squashfs/squashfs_fs.h src/squashfs/swap.c
 squashfs_src += src/squashfs/caches-queues-lists.h src/squashfs/caches-queues-lists.c
 squashfs_src += src/squashfs/error.h src/squashfs/info.h src/squashfs/lz4_wrapper.h src/squashfs/mksquashfs.c
@@ -45,8 +48,8 @@ core_src += src/main.c
 
 
 include_HEADERS = include/cladder.h
-cladder_SOURCES = $(core_headers) $(squashfs_src) $(core_src)
-cladder_LDADD   = -lmount -lpthread -lm -llz4
+cladder_SOURCES = $(core_headers) $(lz4hc_src) $(squashfs_src) $(core_src)
+cladder_LDADD   = -lpthread -lm
 bin_PROGRAMS    = cladder
 
 dist_man_MANS  =

@@ -30,14 +30,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <libmount/libmount.h>
+#include <sys/mount.h>
+#include <string.h>
+#include <errno.h>
+
 #include "src/squashfs/squashfs_fs.h"
 #include "src/squashfs/mksquashfs.h"
 
 int main (int argc, char *argv[])
 {
 
-	struct libmnt_context *ctx;
 	struct passwd *pwd;
 	uid_t uid;
 
@@ -67,7 +69,7 @@ int main (int argc, char *argv[])
 			printf("  -V      display the version\n");
 
 			printf("Example:\n");
-			printf("  %s      test  writeable\n");
+			printf("  %s      test  writeable\n", PACKAGE_NAME);
 
 			printf("\n");
 			exit(0);
@@ -84,17 +86,6 @@ int main (int argc, char *argv[])
 		exit(1);
 	}
 
-	mnt_init_debug(0);
-	ctx = mnt_new_context();
-	if (!ctx) {
-		fprintf(stderr, "failed to allocate mount context\n");
-		exit(1);
-	}
-	/*if (mnt_context_append_options(ctx, "")) {
-		fprintf(stderr, "failed to add mount option\n");
-		exit(1);
-	}
-	*/
 	pwd = getpwnam(getenv("SUDO_USER"));
 	if (pwd == NULL) {
 		exit(1);
@@ -105,18 +96,13 @@ int main (int argc, char *argv[])
 	mkdir(".cladder.sqsh", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
 	chown(".cladder.sqsh", uid, -1);
 
-	mnt_context_set_fstype(ctx, "tmpfs");
-	mnt_context_set_source(ctx, "tmpfs");
-	mnt_context_append_options(ctx, "size=128m");
-	mnt_context_append_options(ctx, "mode=0750");
 	char *u_opt = malloc(64);
-	sprintf(u_opt, "uid=%s", getenv("SUDO_USER"));
-	mnt_context_append_options(ctx, u_opt);
+	sprintf(u_opt, "size=128m,mode=0750,uid=%s", getenv("SUDO_USER"));
+	if (mount("tmpfs", ".cladder", "tmpfs", 0, u_opt) != 0) {
+		fprintf(stderr, "failed to mount ram in .cladder [%s]\n", strerror(errno));
+		exit(1);
+	}
 	free(u_opt);
-	mnt_context_set_target(ctx, ".cladder");
-
-	int rc = mnt_context_mount(ctx);
-	mnt_free_context(ctx);
 
 	mkdir(".cladder/up", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
 	mkdir(".cladder/work", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
@@ -126,40 +112,20 @@ int main (int argc, char *argv[])
 	char *squashed = malloc(64);
 	sprintf(squashed, "%s.sqsh", argv[1]);
 	squash(argv[1], squashed);
-	ctx = mnt_new_context();
-	if (!ctx) {
-		fprintf(stderr, "failed to allocate mount context\n");
+	if (mount(squashed, ".cladder.sqsh", "squashfs", 0, NULL) != 0) {
+		fprintf(stderr, "failed to mount squash to .cladder.sqsh [%s]\n", strerror(errno));
 		exit(1);
 	}
-	mnt_context_set_fstype(ctx, "squashfs");
-	mnt_context_set_source(ctx, squashed);
-	mnt_context_set_target(ctx, ".cladder.sqsh");
-
-
-	rc = mnt_context_mount(ctx);
-	mnt_free_context(ctx);
-
-	ctx = mnt_new_context();
-	if (!ctx) {
-		fprintf(stderr, "failed to allocate mount context\n");
-		exit(1);
-	}
-	mnt_context_set_fstype(ctx, "overlay");
-	mnt_context_set_source(ctx, "overlay");
+	free(squashed);
 
 	mkdir(argv[2], S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
 	chown(argv[2], uid, -1);
 
-	mnt_context_set_target(ctx, argv[2]);
-	//char *lower = malloc(64);
-	//sprintf(lower, "lowerdir=%s", argv[1]);
-	mnt_context_append_options(ctx, "lowerdir=.cladder.sqsh");
-	//free(lower);
-	mnt_context_append_options(ctx, "upperdir=.cladder/up");
-	mnt_context_append_options(ctx, "workdir=.cladder/work");
+	if (mount("overlay", argv[2], "overlay", 0,
+		"lowerdir=.cladder.sqsh,upperdir=.cladder/up,workdir=.cladder/work") != 0) {
+		fprintf(stderr, "failed to overlay %s onto %s [%s]\n", argv[2], ".cladder.sqsh", strerror(errno));
+		exit(1);
+	}
 
-	rc = mnt_context_mount(ctx);
-	mnt_free_context(ctx);
-
-	return rc;
+	return 0;
 }
