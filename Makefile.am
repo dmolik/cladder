@@ -29,7 +29,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/squashfs
 core_headers :=
 core_headers += include/cladder.h
 
-lz4_headers = include/lz4.h src/lz4/lz4opt.h src/lz4/lz4hc.h
+lz4_headers = include/lz4.h include/lz4opt.h include/lz4hc.h
 lz4_src     = src/lz4/lz4.c
 lz4hc_src   = $(lz4_src) src/lz4/lz4hc.c
 
