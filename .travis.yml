@@ -1,7 +1,61 @@
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+      env:
+         - MATRIX_EVAL="CC=gcc-4.9"
 
-language: c
-os:
-  - linux
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5"
+
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+      env:
+        - MATRIX_EVAL="CC=clang-4.0"
+
+    # works on Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty
+          packages:
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0"
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+
 script:
   - export PATH="$PATH:${BUILD_PREFIX}/bin"
   - ./bootstrap.sh
