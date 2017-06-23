@@ -31,7 +31,7 @@ core_headers += include/cladder.h
 
 lz4_headers = src/lz4/lz4.h src/lz4/lz4opt.h src/lz4/lz4hc.h
 lz4_src     = src/lz4/lz4.c
-lz4hc_src   = $(lz4_headers) $(lz4_src)   src/lz4/lz4hc.c
+lz4hc_src   = $(lz4_src) src/lz4/lz4hc.c
 
 squashfs_src  = src/squashfs/squashfs_swap.h src/squashfs/squashfs_fs.h src/squashfs/swap.c
 squashfs_src += src/squashfs/caches-queues-lists.h src/squashfs/caches-queues-lists.c
