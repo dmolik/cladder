@@ -92,9 +92,15 @@ int main (int argc, char *argv[])
 	}
 	uid = pwd->pw_uid;
 	mkdir(".cladder", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	chown(".cladder", uid, -1);
+	if (chown(".cladder", uid, -1) != 0) {
+		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder", getenv("SUDO_USER"), strerror(errno));
+		exit(1);
+	}
 	mkdir(".cladder.sqsh", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	chown(".cladder.sqsh", uid, -1);
+	if (chown(".cladder.sqsh", uid, -1) != 0) {
+		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder.sqsh", getenv("SUDO_USER"), strerror(errno));
+		exit(1);
+	}
 
 	char *u_opt = malloc(64);
 	sprintf(u_opt, "size=128m,mode=0750,uid=%s", getenv("SUDO_USER"));
@@ -106,8 +112,14 @@ int main (int argc, char *argv[])
 
 	mkdir(".cladder/up", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
 	mkdir(".cladder/work", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	chown(".cladder/up",   uid, -1);
-	chown(".cladder/work", uid, -1);
+	if (chown(".cladder/up",   uid, -1) != 0) {
+		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder/up", getenv("SUDO_USER"), strerror(errno));
+		exit(1);
+	}
+	if (chown(".cladder/work", uid, -1) != 0) {
+		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder/work", getenv("SUDO_USER"), strerror(errno));
+		exit(1);
+	}
 
 	char *squashed = malloc(64);
 	sprintf(squashed, "%s.sqsh", argv[1]);
@@ -119,7 +131,10 @@ int main (int argc, char *argv[])
 	free(squashed);
 
 	mkdir(argv[2], S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	chown(argv[2], uid, -1);
+	if (chown(argv[2], uid, -1) != 0) {
+		fprintf(stderr, "failed to chown %s to %s, [%s]\n", argv[2], getenv("SUDO_USER"), strerror(errno));
+		exit(1);
+	}
 
 	if (mount("overlay", argv[2], "overlay", 0,
 		"lowerdir=.cladder.sqsh,upperdir=.cladder/up,workdir=.cladder/work") != 0) {
