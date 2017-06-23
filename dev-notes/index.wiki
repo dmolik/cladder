@@ -27,7 +27,7 @@ Cladder has started as a test archival and read-readwrite test application. The 
     * [ ] package manager
   * [ ] Kubernetes integration
   * [ ] Verify tool-chains in container (musl)
-  * [ ] Test converstion to initramfs and running on pure hardware
+  * [ ] Artifact to initramfs and test by running on pure hardware, qemu-kvm, libvirt, etc
 
 Forking systemd-nspawn into the repo was the easier part, attempting to get it to build and modify the codebase quickly became unwieldly. I find in very amusing that musl is the libc of choice for projects like this. Given how absured the systemd code base is now. It's worse than glibc.
 
