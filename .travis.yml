@@ -1,0 +1,9 @@
+
+language: c
+os:
+  - linux
+script:
+  - export PATH="$PATH:${BUILD_PREFIX}/bin"
+  - ./bootstrap.sh
+  - ./configure
+  - make
