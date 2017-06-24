@@ -35,12 +35,12 @@ lz4hc_src   = $(lz4_src) src/lz4/lz4hc.c
 
 squashfs_src  = src/squashfs/squashfs_swap.h src/squashfs/squashfs_fs.h src/squashfs/swap.c
 squashfs_src += src/squashfs/caches-queues-lists.h src/squashfs/caches-queues-lists.c
-squashfs_src += src/squashfs/error.h src/squashfs/info.h src/squashfs/lz4_wrapper.h src/squashfs/mksquashfs.c
+squashfs_src += src/squashfs/error.h src/squashfs/lz4_wrapper.h src/squashfs/mksquashfs.c
 squashfs_src += src/squashfs/process_fragments.c src/squashfs/pseudo.c  src/squashfs/read_file.c  src/squashfs/read_fs.h
 squashfs_src += src/squashfs/sort.c  src/squashfs/squashfs_compat.h src/squashfs/compressor.c
 
 squashfs_src += src/squashfs/mksquashfs.h src/squashfs/action.h src/squashfs/action.c  src/squashfs/compressor.h
-squashfs_src += src/squashfs/info.c   src/squashfs/lz4_wrapper.c src/squashfs/process_fragments.h
+squashfs_src += src/squashfs/lz4_wrapper.c src/squashfs/process_fragments.h
 squashfs_src += src/squashfs/pseudo.h  src/squashfs/read_fs.c src/squashfs/read_xattrs.c
 squashfs_src += src/squashfs/sort.h  src/squashfs/xattr.h src/squashfs/xattr.c
 

@@ -42,7 +42,6 @@
 #include "squashfs_fs.h"
 #include "mksquashfs.h"
 #include "error.h"
-#include "info.h"
 #include "compressor.h"
 #include "process_fragments.h"
 

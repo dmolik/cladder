@@ -70,7 +70,7 @@
 #include "xattr.h"
 #include "action.h"
 #include "error.h"
-#include "info.h"
+
 #include "caches-queues-lists.h"
 #include "read_fs.h"
 #include "process_fragments.h"
@@ -3730,8 +3730,6 @@ void dir_scan6(squashfs_inode *inode, struct dir_info *dir_info)
 	while((dir_ent = scan6_readdir(&dir, dir_info, dir_ent)) != NULL) {
 		struct stat *buf = &dir_ent->inode->buf;
 
-		update_info(dir_ent);
-
 		if(dir_ent->inode->inode == SQUASHFS_INVALID_BLK) {
 			switch(buf->st_mode & S_IFMT) {
 				case S_IFREG:
@@ -4020,7 +4018,6 @@ void initialise_threads(int readq, int fragq, int bwriteq, int fwriteq,
 	reserve_cache = cache_init(block_size, processors + 1, 1, 0);
 	pthread_create(&reader_thread, NULL, reader, NULL);
 	pthread_create(&writer_thread, NULL, writer, NULL);
-	init_info();
 
 	for(i = 0; i < processors; i++) {
 		if(pthread_create(&deflator_thread[i], NULL, deflator, NULL))
@@ -4446,7 +4443,6 @@ int squash(char *src, char *dst)
 		no_xattrs, comp_opts);
 	sBlk.mkfs_time = time(NULL);
 
-	disable_info();
 
 	while((fragment = get_frag_action(fragment)))
 		write_fragment(*fragment);
