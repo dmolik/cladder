@@ -73,7 +73,6 @@
 #include "info.h"
 #include "caches-queues-lists.h"
 #include "read_fs.h"
-#include "restore.h"
 #include "process_fragments.h"
 
 int delete = TRUE;
@@ -3122,19 +3121,6 @@ void dir_scan(squashfs_inode *inode, char *pathname,
 	if(sorted)
 		generate_file_priorities(dir_info, 0,
 			&dir_info->dir_ent->inode->buf);
-
-	if(appending) {
-		sigset_t sigmask;
-
-		restore_thread = init_restore_thread();
-		sigemptyset(&sigmask);
-		sigaddset(&sigmask, SIGINT);
-		sigaddset(&sigmask, SIGTERM);
-		sigaddset(&sigmask, SIGUSR1);
-		if(pthread_sigmask(SIG_BLOCK, &sigmask, NULL) == -1)
-			BAD_ERROR("Failed to set signal mask\n");
-		write_destination(fd, SQUASHFS_START, 4, "\0\0\0\0");
-	}
 
 	queue_put(to_reader, dir_info);
 
