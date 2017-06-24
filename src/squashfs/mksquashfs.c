@@ -4359,11 +4359,10 @@ int squash(char *src, char *dst)
 	source = 1;
 
 	comp = lookup_compressor("lz4");
-	res = compressor_options_post(comp, block_size);
-	if(res)
+	if ((res = compressor_options_post(comp, block_size)))
 		EXIT_MKSQUASHFS();
 
-	if(lstat(src, &source_buf) == -1) {
+	if (lstat(src, &source_buf) == -1) {
 		fprintf(stderr, "Cannot stat source directory \"%s\" "
 			"because %s\n", src, strerror(errno));
 		EXIT_MKSQUASHFS();
@@ -4390,8 +4389,7 @@ int squash(char *src, char *dst)
 	initialise_threads(readq, fragq, bwriteq, fwriteq, delete,
 		destination_file);
 
-	res = compressor_init(comp, &stream, SQUASHFS_METADATA_SIZE, 0);
-	if(res)
+	if ((res = compressor_init(comp, &stream, SQUASHFS_METADATA_SIZE, 0)))
 		BAD_ERROR("compressor_init failed\n");
 
 	int size;

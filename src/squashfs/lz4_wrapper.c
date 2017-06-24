@@ -31,7 +31,7 @@
 #include "lz4_wrapper.h"
 #include "compressor.h"
 
-static int hc = 0;
+static int hc = 1;
 
 /*
  * This function is called by the options parsing code in mksquashfs.c
@@ -50,10 +50,8 @@ static int hc = 0;
  */
 static int lz4_options(char *argv[], int argc)
 {
-	if(strcmp(argv[0], "-Xhc") == 0) {
-		hc = 1;
+	if (strcmp(argv[0], "-Xhc") == 0)
 		return 0;
-	}
 
 	return -1;
 }
