@@ -13,9 +13,7 @@ A possible use is to download a source code repo and then build it, and throw aw
 
 Requirements
 
-- pthread
-- lz4
-
+- Linux Kernel supporting squashfs and overlayfs
 
 compiling
 
