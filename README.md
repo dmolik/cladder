@@ -9,13 +9,20 @@ with tmpfs overlayed ontop of it to make it writeable.
 
 A possible use is to download a source code repo and then build it, and throw away the tempoary build files.
 
-## Builing
+## Requirements
 
-Requirements
+### System
 
 - Linux Kernel supporting squashfs and overlayfs
 
-compiling
+### Toolchain
+
+- GCC or Clang
+- autoconf
+- automake
+- libtool
+
+## Compiling
 
     ./bootstrap.sh
     ./configure
