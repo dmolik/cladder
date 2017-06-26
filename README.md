@@ -13,7 +13,6 @@ A possible use is to download a source code repo and then build it, and throw aw
 
 Requirements
 
-- libmount, usually provided by util-linux
 - pthread
 - lz4
 
