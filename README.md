@@ -11,7 +11,7 @@ A possible use is to download a source code repo and then build it, and throw aw
 
 ## Requirements
 
-### System
+### System/Runtime
 
 - Linux Kernel supporting squashfs and overlayfs
 
