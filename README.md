@@ -18,9 +18,7 @@ A possible use is to download a source code repo and then build it, and throw aw
 ### Toolchain
 
 - GCC or Clang
-- autoconf
-- automake
-- libtool
+- libc
 
 ## Compiling
 
