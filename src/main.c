@@ -150,10 +150,6 @@ int main (int argc, char *argv[])
 		close(file_fd);
 		exit(1);
 	}
-	if (ioctl(device_fd, LOOP_CLR_FD, 0) < 0) {
-		perror("ioctl LOOP_CLR_FD failed");
-		exit(1);
-	}
 	if (ioctl(device_fd, LOOP_SET_FD, file_fd) < 0) {
 		perror("ioctl LOOP_SET_FD failed");
 		close(file_fd);

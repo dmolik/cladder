@@ -8,7 +8,7 @@ echo "hello world" > ${ROOT}/data/file1
 
 diag_file ${ROOT}/log
 
-string_is $(cat ${ROOT}/sandbox/file1) "hello world" \
-	"File contents do not match"
+string_is "$(cat ${ROOT}/sandbox/file1)" \
+	"hello world"
 
 exit 0

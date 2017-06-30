@@ -40,9 +40,11 @@ before_install:
   - eval "${MATRIX_EVAL}"
 language: c
 dist: trusty
+sudo: required
 script:
   - export PATH="$PATH:${BUILD_PREFIX}/bin"
   - $CC --version
   - ./bootstrap.sh
   - ./configure
   - make
+  - sudo make check
