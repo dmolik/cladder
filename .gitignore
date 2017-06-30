@@ -16,6 +16,7 @@ src/.deps/
 src/.dirstamp
 
 cladder
+cladder-*.*.*.tar.*
 man/cladder.8
 
 src/*.o
