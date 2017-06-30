@@ -22,16 +22,24 @@ matrix:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
+            - llvm-toolchain-trusty-4.0
           packages:
-            - clang-3.8
+            - clang-4.0
       env:
-        - MATRIX_EVAL="CC=clang-3.8"
-
+        - MATRIX_EVAL="CC=clang-4.0"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty
+          packages:
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0"
 before_install:
   - eval "${MATRIX_EVAL}"
 language: c
+dist: trusty
 script:
   - export PATH="$PATH:${BUILD_PREFIX}/bin"
   - ./bootstrap.sh
