@@ -31,6 +31,8 @@
 #include <sys/types.h>
 
 #include <sys/mount.h>
+#include <linux/loop.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 
@@ -103,7 +105,7 @@ int main (int argc, char *argv[])
 	}
 
 	char *u_opt = malloc(64);
-	sprintf(u_opt, "size=128m,mode=0750,uid=%s", getenv("SUDO_USER"));
+	sprintf(u_opt, "size=134217728,mode=0750,uid=%d", uid);
 	if (mount("tmpfs", ".cladder", "tmpfs", 0, u_opt) != 0) {
 		fprintf(stderr, "failed to mount ram in .cladder [%s]\n", strerror(errno));
 		exit(1);
@@ -124,8 +126,57 @@ int main (int argc, char *argv[])
 	char *squashed = malloc(64);
 	sprintf(squashed, "%s.sqsh", argv[1]);
 	squash(argv[1], squashed);
-	if (mount(squashed, ".cladder.sqsh", "squashfs", 0, NULL) != 0) {
-		fprintf(stderr, "failed to mount squash to .cladder.sqsh [%s]\n", strerror(errno));
+
+	int file_fd, device_fd, loop_ctl;
+
+	file_fd = open(squashed, O_RDWR|O_CLOEXEC);
+	if (file_fd < -1) {
+		perror("open backing file failed");
+		exit(1);
+	}
+	loop_ctl = open("/dev/loop-control", O_RDWR|O_CLOEXEC);
+	if (loop_ctl < -1) {
+		perror("failed to open loop-control");
+		exit(1);
+	}
+	if (ioctl(loop_ctl, LOOP_CTL_GET_FREE, 0) < 0) {
+		perror("failed to get a free loop");
+		exit(1);
+	}
+	close(loop_ctl);
+	device_fd = open("/dev/loop0", O_RDWR|O_CLOEXEC);
+	if (device_fd < -1) {
+		perror("open loop device failed");
+		close(file_fd);
+		exit(1);
+	}
+	if (ioctl(device_fd, LOOP_CLR_FD, 0) < 0) {
+		perror("ioctl LOOP_CLR_FD failed");
+		exit(1);
+	}
+	if (ioctl(device_fd, LOOP_SET_FD, file_fd) < 0) {
+		perror("ioctl LOOP_SET_FD failed");
+		close(file_fd);
+		close(device_fd);
+		exit(1);
+	}
+	struct loop_info64 loopinfo;
+	memset(&loopinfo, 0, sizeof(loopinfo));
+	memcpy(loopinfo.lo_file_name, (unsigned char *)squashed, LO_NAME_SIZE);
+	loopinfo.lo_file_name[LO_NAME_SIZE - 1] = 0;
+	loopinfo.lo_offset = 0;
+	loopinfo.lo_flags = LO_FLAGS_AUTOCLEAR;
+	if (ioctl(device_fd, LOOP_SET_STATUS64, &loopinfo) < 0) {
+		perror("failed to set device status");
+		close(file_fd);
+		close(device_fd);
+		exit(1);
+	}
+	close(file_fd);
+	close(device_fd);
+
+	if (mount("/dev/loop0", ".cladder.sqsh", "squashfs", MS_RDONLY, NULL) != 0) {
+		fprintf(stderr, "failed to mount %s to .cladder.sqsh [%s]\n", squashed, strerror(errno));
 		exit(1);
 	}
 	free(squashed);
