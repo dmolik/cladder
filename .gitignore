@@ -28,3 +28,7 @@ src/squashfs/.dirstamp
 src/lz4/*.o
 src/lz4/.deps/
 src/lz4/.dirstamp
+
+t/*.trs
+t/*log
+test-suite.log

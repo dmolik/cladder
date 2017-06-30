@@ -56,6 +56,10 @@ bin_PROGRAMS    = cladder
 dist_man_MANS  =
 dist_man_MANS += man/cladder.8
 
+check_SCRIPTS = t/01-full.sh
+TESTS = $(check_SCRIPTS)
+dist_check_SCRIPTS=$(check_SCRIPTS) t/run t/lib.sh
+
 EXTRA_DIST = Changelog README.md COPYING
 
 man/%.1: man/%.1.pod
