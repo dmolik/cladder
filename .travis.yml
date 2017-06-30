@@ -42,6 +42,7 @@ language: c
 dist: trusty
 script:
   - export PATH="$PATH:${BUILD_PREFIX}/bin"
+  - $CC --version
   - ./bootstrap.sh
   - ./configure
   - make
