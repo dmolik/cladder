@@ -36,14 +36,69 @@
 #include <string.h>
 #include <errno.h>
 
+#include <uuid/uuid.h>
+#include <sched.h>
+
 #include "src/squashfs/squashfs_fs.h"
 #include "src/squashfs/mksquashfs.h"
 
+char  *_wrk = NULL;
+char   id[37];
+uid_t  uid;
+struct passwd *pwd;
+
+void _mkpnt(char *pnt)
+{
+	char   *tmp = malloc(64);
+	struct  stat sb;
+	if (_wrk == NULL) {
+		_wrk = malloc(64);
+		sprintf(_wrk, "/var/lib/cladder/%s", id);
+		if (stat("/var/lib/cladder", &sb) != 0 || !S_ISDIR(sb.st_mode)) {
+			unlink("/var/lib/cladder");
+			if (mkdir("/var/lib/cladder", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) != 0) {
+				fprintf(stderr, "failed to create data dir [%s]\n", strerror(errno));
+				exit(1);
+			}
+		}
+		if (stat(_wrk, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
+			unlink(_wrk);
+			if (mkdir(_wrk, S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP) != 0) {
+				fprintf(stderr, "failed to create wrking dir [%s]\n", strerror(errno));
+				exit(1);
+			}
+			if (chown(_wrk, uid, -1) != 0) {
+				fprintf(stderr, "failed to chown wrking dir [%s]\n", strerror(errno));
+				exit(1);
+			}
+		}
+	}
+
+	sprintf(tmp, "%s/%s", _wrk, pnt);
+	if (mkdir(tmp, S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP) != 0) {
+		fprintf(stderr, "failed to create mnt point in wrking dir [%s]\n", strerror(errno));
+		exit(1);
+	}
+	if (chown(tmp, uid, -1) != 0) {
+		fprintf(stderr, "failed to chown wrking dir [%s]\n", strerror(errno));
+		exit(1);
+	}
+	free(tmp);
+}
+
+void _mnt(char *src, char *dst, char *type, int flags, char *opts)
+{
+	char *tmp = malloc(64);
+	sprintf(tmp, "%s/%s", _wrk, dst);
+	if (mount(src, tmp, type, flags, opts) != 0) {
+		fprintf(stderr, "failed to mount %s onto %s as %s [%s]\n", src, dst, type, strerror(errno));
+		exit(1);
+	}
+	free(tmp);
+}
+
 int main (int argc, char *argv[])
 {
-
-	struct passwd *pwd;
-	uid_t uid;
 
 	struct option long_opts[] = {
 		{ "help",             no_argument, NULL, 'h' },
@@ -87,44 +142,29 @@ int main (int argc, char *argv[])
 		printf("please provide a src and dst, see -? for more information\n");
 		exit(1);
 	}
+	uuid_t uuid;
+	uuid_generate(uuid);
+	uuid_unparse_lower(uuid, id);
 
 	pwd = getpwnam(getenv("SUDO_USER"));
 	if (pwd == NULL) {
+		fprintf(stderr, "not running as sudo\n");
 		exit(1);
 	}
 	uid = pwd->pw_uid;
-	mkdir(".cladder", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	if (chown(".cladder", uid, -1) != 0) {
-		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder", getenv("SUDO_USER"), strerror(errno));
-		exit(1);
-	}
-	mkdir(".cladder.sqsh", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	if (chown(".cladder.sqsh", uid, -1) != 0) {
-		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder.sqsh", getenv("SUDO_USER"), strerror(errno));
-		exit(1);
-	}
+	_mkpnt("wrk");
+	_mkpnt("sqsh");
 
 	char *u_opt = malloc(64);
 	sprintf(u_opt, "size=134217728,mode=0750,uid=%d", uid);
-	if (mount("tmpfs", ".cladder", "tmpfs", 0, u_opt) != 0) {
-		fprintf(stderr, "failed to mount ram in .cladder [%s]\n", strerror(errno));
-		exit(1);
-	}
+	_mnt("tmpfs", "wrk", "tmpfs", 0, u_opt);
 	free(u_opt);
 
-	mkdir(".cladder/up", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	mkdir(".cladder/work", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	if (chown(".cladder/up",   uid, -1) != 0) {
-		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder/up", getenv("SUDO_USER"), strerror(errno));
-		exit(1);
-	}
-	if (chown(".cladder/work", uid, -1) != 0) {
-		fprintf(stderr, "failed to chown %s to %s, [%s]\n", ".cladder/work", getenv("SUDO_USER"), strerror(errno));
-		exit(1);
-	}
+	_mkpnt("wrk/up");
+	_mkpnt("wrk/work");
 
-	char *squashed = malloc(64);
-	sprintf(squashed, "%s.sqsh", argv[1]);
+	char *squashed = malloc(256);
+	sprintf(squashed, "%s/%s.sqsh", _wrk, argv[1]);
 	squash(argv[1], squashed);
 
 	int file_fd, device_fd, loop_ctl;
@@ -171,23 +211,31 @@ int main (int argc, char *argv[])
 	close(file_fd);
 	close(device_fd);
 
-	if (mount("/dev/loop0", ".cladder.sqsh", "squashfs", MS_RDONLY, NULL) != 0) {
-		fprintf(stderr, "failed to mount %s to .cladder.sqsh [%s]\n", squashed, strerror(errno));
-		exit(1);
-	}
+	_mnt("/dev/loop0", "sqsh", "squashfs", MS_RDONLY, NULL);
 	free(squashed);
 
-	mkdir(argv[2], S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP);
-	if (chown(argv[2], uid, -1) != 0) {
-		fprintf(stderr, "failed to chown %s to %s, [%s]\n", argv[2], getenv("SUDO_USER"), strerror(errno));
+	/*
+	if (unshare(CLONE_NEWNS) != 0) {
+		fprintf(stderr, "failed to unshare [%s]\n", strerror(errno));
 		exit(1);
 	}
+	*/
 
-	if (mount("overlay", argv[2], "overlay", 0,
-		"lowerdir=.cladder.sqsh,upperdir=.cladder/up,workdir=.cladder/work") != 0) {
-		fprintf(stderr, "failed to overlay %s onto %s [%s]\n", argv[2], ".cladder.sqsh", strerror(errno));
+	char *tree = malloc(256);
+	sprintf(tree, "lowerdir=%s/sqsh,upperdir=%s/wrk/up,workdir=%s/wrk/work", _wrk, _wrk, _wrk);
+	_mkpnt("root");
+	_mnt("overlay", "root", "overlay", 0, tree);
+	free(tree);
+	/*
+	if (mount("none", argv[2], NULL, MS_PRIVATE, NULL) != 0) {
+		fprintf(stderr, "failed to remount root at %s as shared [%s]\n", argv[2], strerror(errno));
 		exit(1);
 	}
+	if (mount("none", argv[2], NULL, MS_SHARED, NULL) != 0) {
+		fprintf(stderr, "failed to remount root at %s as shared [%s]\n", argv[2], strerror(errno));
+		exit(1);
+	}
+	*/
 
 	return 0;
 }

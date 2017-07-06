@@ -50,7 +50,7 @@ core_src += src/main.c
 
 include_HEADERS = include/cladder.h $(lz4_headers)
 cladder_SOURCES = $(core_headers) $(lz4hc_src) $(squashfs_src) $(core_src)
-cladder_LDADD   = -lpthread -lm
+cladder_LDADD   = -lpthread -lm -luuid
 bin_PROGRAMS    = cladder
 
 dist_man_MANS  =

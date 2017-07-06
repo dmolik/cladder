@@ -33,6 +33,7 @@ AC_PROG_INSTALL
 
 AC_HAVE_LIBRARY(pthread, , AC_MSG_ERROR(Missing pthread library))
 AC_HAVE_LIBRARY(m, ,       AC_MSG_ERROR(Missing math library))
+AC_HAVE_LIBRARY(uuid, ,    AC_MSG_ERROR(Missing uuid library))
 
 AC_C_INLINE
 
