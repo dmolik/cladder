@@ -251,6 +251,9 @@ int main (int argc, char *argv[])
 	if (chdir("/") != 0) {
 		fprintf(stderr, "failed to set working to / [%s]\n", strerror(errno));
 	}
+	if (umount2("/old", MNT_FORCE|MNT_DETACH) != 0) {
+		fprintf(stderr, "failed to unmount old root [%s]\n", strerror(errno));
+	}
 
 	char *args[] = { "/sbin/init", 0 };
 	char *envp[] = {
@@ -260,9 +263,6 @@ int main (int argc, char *argv[])
 	if (fork() == 0 ) {
 		execve(args[0], &args[0], envp);
 	} else {
-		if (umount2("/old", MNT_FORCE) != 0) {
-			fprintf(stderr, "failed to unmount old root [%s]\n", strerror(errno));
-		}
 	}
 
 	return 0;
