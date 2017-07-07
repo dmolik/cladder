@@ -153,6 +153,16 @@ int main (int argc, char *argv[])
 	uid = pwd->pw_uid;
 	_mkpnt("wrk");
 	_mkpnt("sqsh");
+	_mkpnt("root");
+
+	char *squashed = malloc(256);
+	sprintf(squashed, "%s/%s.sqsh", _wrk, argv[1]);
+	squash(argv[1], squashed);
+
+	if (unshare(CLONE_NEWNS) != 0) {
+		fprintf(stderr, "failed to segregate filesystem, unshare[%s]\n", strerror(errno));
+		exit(1);
+	}
 
 	char *u_opt = malloc(64);
 	sprintf(u_opt, "size=134217728,mode=0750,uid=%d", uid);
@@ -161,10 +171,6 @@ int main (int argc, char *argv[])
 
 	_mkpnt("wrk/up");
 	_mkpnt("wrk/work");
-
-	char *squashed = malloc(256);
-	sprintf(squashed, "%s/%s.sqsh", _wrk, argv[1]);
-	squash(argv[1], squashed);
 
 	int   file_fd, device_fd, loop_ctl;
 	long  dev_num;
@@ -215,31 +221,21 @@ int main (int argc, char *argv[])
 	close(file_fd);
 	close(device_fd);
 
-	_mnt("/dev/loop0", "sqsh", "squashfs", MS_RDONLY, NULL);
+	_mnt(loop_name, "sqsh", "squashfs", MS_RDONLY, NULL);
 	free(squashed);
-
-	/*
-	if (unshare(CLONE_NEWNS) != 0) {
-		fprintf(stderr, "failed to unshare [%s]\n", strerror(errno));
-		exit(1);
-	}
-	*/
 
 	char *tree = malloc(256);
 	sprintf(tree, "lowerdir=%s/sqsh,upperdir=%s/wrk/up,workdir=%s/wrk/work", _wrk, _wrk, _wrk);
-	_mkpnt("root");
 	_mnt("overlay", "root", "overlay", 0, tree);
 	free(tree);
-	/*
-	if (mount("none", argv[2], NULL, MS_PRIVATE, NULL) != 0) {
-		fprintf(stderr, "failed to remount root at %s as shared [%s]\n", argv[2], strerror(errno));
-		exit(1);
-	}
-	if (mount("none", argv[2], NULL, MS_SHARED, NULL) != 0) {
-		fprintf(stderr, "failed to remount root at %s as shared [%s]\n", argv[2], strerror(errno));
-		exit(1);
-	}
-	*/
+
+	_mkpnt("root/proc");
+	_mkpnt("root/dev");
+	_mkpnt("root/sys");
+	_mnt("proc", "root/proc", "proc",  0,       NULL);
+	_mnt("sys",  "root/sys",  "sysfs", 0,       NULL);
+	_mnt("/dev", "root/dev",  "none",  MS_BIND, NULL);
+
 
 	return 0;
 }
