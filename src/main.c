@@ -241,7 +241,7 @@ int main (int argc, char *argv[])
 	_mnt("sys",  "root/sys",  "sysfs", 0,       NULL);
 	_mnt("/dev", "root/dev",  "none",  MS_BIND, NULL);
 
-	unshare(CLONE_FS|CLONE_NEWCGROUP|CLONE_NEWIPC|CLONE_NEWPID|CLONE_NEWUSER|CLONE_NEWUTS|CLONE_SYSVSEM);
+	unshare(CLONE_FS|CLONE_NEWIPC|CLONE_NEWPID|CLONE_NEWUSER|CLONE_NEWUTS|CLONE_SYSVSEM);
 	char *_root     = malloc(256);
 	char *_old_root = malloc(256);
 	sprintf(_root,     "%s/root",     _wrk);
