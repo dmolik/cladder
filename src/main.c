@@ -254,6 +254,7 @@ int main (int argc, char *argv[])
 	if (umount2("/old", MNT_FORCE|MNT_DETACH) != 0) {
 		fprintf(stderr, "failed to unmount old root [%s]\n", strerror(errno));
 	}
+	unshare(CLONE_NEWNS);
 
 	char *args[] = { "/sbin/init", 0 };
 	char *envp[] = {
