@@ -29,6 +29,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include <sys/mount.h>
 #include <linux/loop.h>
@@ -98,6 +99,19 @@ void _mnt(char *src, char *dst, char *type, int flags, char *opts)
 		exit(1);
 	}
 	free(tmp);
+}
+
+static int init(void *arg)
+{
+	char *args[] = { "/sbin/init", 0 };
+	char *envp[] = {
+		"PATH=/bin",
+		0
+	};
+	if (mount("proc", "/proc", "proc",  0, NULL) != 0) {
+		fprintf(stderr, "failed to mount proc [%s]\n", strerror(errno));
+	}
+	execve(args[0], &args[0], envp);
 }
 
 int main (int argc, char *argv[])
@@ -237,11 +251,14 @@ int main (int argc, char *argv[])
 	_mkpnt("root/sys");
 	_mkpnt("root/tmp");
 	_mkpnt("root/old");
-	_mnt("proc", "root/proc", "proc",  0,       NULL);
+	//_mnt("proc", "root/proc", "proc",  0,       NULL);
 	_mnt("sys",  "root/sys",  "sysfs", 0,       NULL);
 	_mnt("/dev", "root/dev",  "none",  MS_BIND, NULL);
 
-	unshare(CLONE_FS|CLONE_NEWIPC|CLONE_NEWPID|CLONE_NEWUSER|CLONE_NEWUTS|CLONE_SYSVSEM);
+	// if (unshare(CLONE_FS|CLONE_NEWIPC|CLONE_NEWPID|CLONE_NEWUSER|CLONE_NEWUTS|CLONE_SYSVSEM) != 0) {
+	if (unshare(CLONE_FS|CLONE_FILES|CLONE_NEWUTS|CLONE_SYSVSEM|CLONE_NEWIPC) != 0) {
+		fprintf(stderr, "failed to unshare manythings [%s]\n", strerror(errno));
+	}
 	char *_root     = malloc(256);
 	char *_old_root = malloc(256);
 	sprintf(_root,     "%s/root",     _wrk);
@@ -256,12 +273,20 @@ int main (int argc, char *argv[])
 	}
 	unshare(CLONE_NEWNS);
 
-	char *args[] = { "/sbin/init", 0 };
-	char *envp[] = {
-		"PATH=/bin",
-		0
-	};
-	execve(args[0], &args[0], envp);
+	pid_t pid, w;
+	int wstatus;
+	char *stack     = malloc(1024 * 1024 * 32);
+	char *stack_top = stack + 1024 * 1024 * 32; // counting on order of operations
+	// pid = clone(init, stack_top, CLONE_NEWPID|CLONE_NEWUSER, NULL);
+	if ((pid = clone(init, stack_top, CLONE_NEWPID|SIGCHLD, NULL)) == -1) {
+		fprintf(stderr, "clone failed [%s]\n", strerror(errno));
+	}
+	do {
+		w = waitpid(pid, &wstatus, WUNTRACED | WCONTINUED);
+		if (w == -1)
+			perror("waitpid");
+	} while (!WIFEXITED(wstatus) && !WIFSIGNALED(wstatus));
+	printf("child has terminated\n");
 
 	return 0;
 }
