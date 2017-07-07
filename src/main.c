@@ -261,10 +261,7 @@ int main (int argc, char *argv[])
 		"PATH=/bin",
 		0
 	};
-	if (fork() == 0 ) {
-		execve(args[0], &args[0], envp);
-	} else {
-	}
+	execve(args[0], &args[0], envp);
 
 	return 0;
 }
