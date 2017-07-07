@@ -42,6 +42,9 @@
 #include "src/squashfs/squashfs_fs.h"
 #include "src/squashfs/mksquashfs.h"
 
+#include <sys/syscall.h>
+#define pivot_root(new_root,put_old) syscall(SYS_pivot_root,new_root,put_old)
+
 char  *_wrk = NULL;
 char   id[37];
 uid_t  uid;
@@ -232,10 +235,35 @@ int main (int argc, char *argv[])
 	_mkpnt("root/proc");
 	_mkpnt("root/dev");
 	_mkpnt("root/sys");
+	_mkpnt("root/tmp");
+	_mkpnt("root/old");
 	_mnt("proc", "root/proc", "proc",  0,       NULL);
 	_mnt("sys",  "root/sys",  "sysfs", 0,       NULL);
 	_mnt("/dev", "root/dev",  "none",  MS_BIND, NULL);
 
+	unshare(CLONE_FS|CLONE_NEWCGROUP|CLONE_NEWIPC|CLONE_NEWPID|CLONE_NEWUSER|CLONE_NEWUTS|CLONE_SYSVSEM);
+	char *_root     = malloc(256);
+	char *_old_root = malloc(256);
+	sprintf(_root,     "%s/root",     _wrk);
+	sprintf(_old_root, "%s/root/old", _wrk);
+
+	pivot_root(_root, _old_root);
+	if (chdir("/") != 0) {
+		fprintf(stderr, "failed to set working to / [%s]\n", strerror(errno));
+	}
+
+	char *args[] = { "/sbin/init", 0 };
+	char *envp[] = {
+		"PATH=/bin",
+		0
+	};
+	if (fork() == 0 ) {
+		execve(args[0], &args[0], envp);
+	} else {
+		if (umount2("/old", MNT_FORCE) != 0) {
+			fprintf(stderr, "failed to unmount old root [%s]\n", strerror(errno));
+		}
+	}
 
 	return 0;
 }
