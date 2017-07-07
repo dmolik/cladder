@@ -104,13 +104,23 @@ void _mnt(char *src, char *dst, char *type, int flags, char *opts)
 static int init(void *arg)
 {
 	char *args[] = { "/sbin/init", 0 };
-	char *envp[] = {
-		"PATH=/bin",
-		0
-	};
+	char *term   = malloc(32);
+	sprintf(term, "TERM=%s", getenv("TERM"));
+	printf("term: %s\n", term);
+	char **envp;
+	envp = malloc(sizeof(char *));
+	envp[0] = malloc(32);
+	envp[0] = "PATH=/bin";
+	envp[1] = malloc(32);
+	strcpy(envp[1], term);
+	envp[2] = malloc(2);
+	envp[2] = 0;
+
+	free(term);
 	if (mount("proc", "/proc", "proc",  0, NULL) != 0) {
 		fprintf(stderr, "failed to mount proc [%s]\n", strerror(errno));
 	}
+	unshare(CLONE_NEWUSER);
 	execve(args[0], &args[0], envp);
 }
 
@@ -272,6 +282,7 @@ int main (int argc, char *argv[])
 		fprintf(stderr, "failed to unmount old root [%s]\n", strerror(errno));
 	}
 	unshare(CLONE_NEWNS);
+	unlink("/old");
 
 	pid_t pid, w;
 	int wstatus;
