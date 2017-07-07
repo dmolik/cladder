@@ -114,12 +114,11 @@ int main (int argc, char *argv[])
 		case 'h':
 		case '?':
 			printf("%s v%s\n", PACKAGE_NAME, PACKAGE_VERSION);
-			printf("Usage: %s [-h?V] src dst\n",
+			printf("Usage: %s [-h?V] src\n",
 			         PACKAGE_NAME);
 
 			printf("Required:\n");
 			printf("  src     the source directory to turn into an archive\n");
-			printf("  dst     the destination directory to overlay mount tmpfs onto the archive\n");
 
 			printf("Options:\n");
 			printf("  -?, -h  show this help screen\n");
@@ -138,8 +137,8 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	if (argv[1] == NULL || argv[2] == NULL) {
-		printf("please provide a src and dst, see -? for more information\n");
+	if (argv[1] == NULL) {
+		printf("please provide a src, see -? for more information\n");
 		exit(1);
 	}
 	uuid_t uuid;
@@ -167,7 +166,9 @@ int main (int argc, char *argv[])
 	sprintf(squashed, "%s/%s.sqsh", _wrk, argv[1]);
 	squash(argv[1], squashed);
 
-	int file_fd, device_fd, loop_ctl;
+	int   file_fd, device_fd, loop_ctl;
+	long  dev_num;
+	char *loop_name;
 
 	file_fd = open(squashed, O_RDWR|O_CLOEXEC);
 	if (file_fd < -1) {
@@ -179,12 +180,15 @@ int main (int argc, char *argv[])
 		perror("failed to open loop-control");
 		exit(1);
 	}
-	if (ioctl(loop_ctl, LOOP_CTL_GET_FREE, 0) < 0) {
+	if ((dev_num = ioctl(loop_ctl, LOOP_CTL_GET_FREE, 0)) < 0) {
 		perror("failed to get a free loop");
 		exit(1);
 	}
 	close(loop_ctl);
-	device_fd = open("/dev/loop0", O_RDWR|O_CLOEXEC);
+
+	loop_name = malloc(64);
+	sprintf(loop_name, "/dev/loop%ld", dev_num);
+	device_fd = open(loop_name, O_RDWR|O_CLOEXEC);
 	if (device_fd < -1) {
 		perror("open loop device failed");
 		close(file_fd);
