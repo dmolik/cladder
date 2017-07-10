@@ -105,6 +105,8 @@ static int init(void *arg)
 {
 	if (arg != NULL)
 		fprintf(stderr, "arg is not null\n");
+	if (sethostname(arg, strlen(arg)) != 0)
+		fprintf(stderr, "failed to set hostname to %s, [%s]\n", (char *)arg, strerror(errno));
 	char *args[] = { "/sbin/init", 0 };
 	char *term   = malloc(32);
 	sprintf(term, "TERM=%s", getenv("TERM"));
