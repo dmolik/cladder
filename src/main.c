@@ -103,6 +103,8 @@ void _mnt(char *src, char *dst, char *type, int flags, char *opts)
 
 static int init(void *arg)
 {
+	if (arg != NULL)
+		fprintf(stderr, "arg is not null\n");
 	char *args[] = { "/sbin/init", 0 };
 	char *term   = malloc(32);
 	sprintf(term, "TERM=%s", getenv("TERM"));
@@ -121,7 +123,7 @@ static int init(void *arg)
 		fprintf(stderr, "failed to mount proc [%s]\n", strerror(errno));
 	}
 	unshare(CLONE_NEWUSER);
-	execve(args[0], &args[0], envp);
+	return execve(args[0], &args[0], envp);
 }
 
 int main (int argc, char *argv[])
@@ -289,7 +291,7 @@ int main (int argc, char *argv[])
 	char *stack     = malloc(1024 * 1024 * 32);
 	char *stack_top = stack + 1024 * 1024 * 32; // counting on order of operations
 	// pid = clone(init, stack_top, CLONE_NEWPID|CLONE_NEWUSER, NULL);
-	if ((pid = clone(init, stack_top, CLONE_NEWPID|SIGCHLD, NULL)) == -1) {
+	if ((pid = clone(init, stack_top, CLONE_NEWPID|SIGCHLD, id)) == -1) {
 		fprintf(stderr, "clone failed [%s]\n", strerror(errno));
 	}
 	do {
