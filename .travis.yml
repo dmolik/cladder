@@ -30,16 +30,16 @@ matrix:
             - uuid-dev
       env:
         - MATRIX_EVAL="CC=clang-4.0"
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty
-          packages:
-            - clang-5.0
-            - uuid-dev
-      env:
-        - MATRIX_EVAL="CC=clang-5.0"
+#    - os: linux
+#      addons:
+#        apt:
+#          sources:
+#            - llvm-toolchain-trusty
+#          packages:
+#            - clang-5.0
+#            - uuid-dev
+#      env:
+#        - MATRIX_EVAL="CC=clang-5.0"
 before_install:
   - eval "${MATRIX_EVAL}"
 language: c
