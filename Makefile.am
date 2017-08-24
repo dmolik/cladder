@@ -22,7 +22,7 @@ AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I build
 
 AM_CFLAGS = -Wall -Wextra -g -std=gnu99 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
-	-D_LARGEFILE_SOURCE -DCOMP_DEFAULT=\"lz4\" \
+	-D_LARGEFILE_SOURCE \
 	-DLZ4_SUPPORT -DXATTR_SUPPORT -DXATTR_DEFAULT $(DEPS_CFLAGS)
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/squashfs
 
@@ -45,12 +45,15 @@ squashfs_src += src/squashfs/pseudo.h  src/squashfs/read_fs.c src/squashfs/read_
 squashfs_src += src/squashfs/sort.h  src/squashfs/xattr.h src/squashfs/xattr.c
 
 core_src :=
+core_src += src/network/fw.h src/network/fw.h
+core_src += src/network/namespace.h src/network/namespace.h
+core_src += src/network/nl.h src/network/nl.c
+core_src += src/network/net.h src/network/net.c
 core_src += src/main.c
 
 
 include_HEADERS = include/cladder.h $(lz4_headers)
 cladder_SOURCES = $(core_headers) $(lz4hc_src) $(squashfs_src) $(core_src)
-cladder_LDADD   = -lpthread -lm -luuid
 bin_PROGRAMS    = cladder
 
 dist_man_MANS  =
