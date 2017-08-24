@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/syscall.h>
+
 
 #include <sys/mount.h>
 #include <linux/loop.h>
@@ -38,13 +40,15 @@
 #include <errno.h>
 
 #include <uuid/uuid.h>
+#define _GNU_SOURCE
 #include <sched.h>
 
-#include "src/squashfs/squashfs_fs.h"
-#include "src/squashfs/mksquashfs.h"
+#include "src/deps/squashfs/squashfs_fs.h"
+#include "src/deps/squashfs/mksquashfs.h"
 
-#include <sys/syscall.h>
+#define _DATA "/var/lib/cladder"
 #define pivot_root(new_root,put_old) syscall(SYS_pivot_root,new_root,put_old)
+
 
 char  *_wrk = NULL;
 char   id[37];
@@ -58,9 +62,9 @@ void _mkpnt(char *pnt)
 	if (_wrk == NULL) {
 		_wrk = malloc(64);
 		sprintf(_wrk, "/var/lib/cladder/%s", id);
-		if (stat("/var/lib/cladder", &sb) != 0 || !S_ISDIR(sb.st_mode)) {
-			unlink("/var/lib/cladder");
-			if (mkdir("/var/lib/cladder", S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) != 0) {
+		if (stat(_DATA, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
+			unlink(_DATA);
+			if (mkdir(_DATA, S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) != 0) {
 				fprintf(stderr, "failed to create data dir [%s]\n", strerror(errno));
 				exit(1);
 			}
