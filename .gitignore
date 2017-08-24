@@ -12,22 +12,26 @@ config.log
 config.status
 stamp-h1
 
-src/.deps/
-src/.dirstamp
 
 cladder
 cladder-*.*.*.tar.*
 man/cladder.8
 
+src/.deps/
+src/.dirstamp
 src/*.o
 
-src/squashfs/*.o
-src/squashfs/.deps/
-src/squashfs/.dirstamp
+src/net/.deps/
+src/net/.dirstamp
+src/net/*.o
 
-src/lz4/*.o
-src/lz4/.deps/
-src/lz4/.dirstamp
+src/deps/squashfs/*.o
+src/deps/squashfs/.deps/
+src/deps/squashfs/.dirstamp
+
+src/deps/lz4/*.o
+src/deps/lz4/.deps/
+src/deps/lz4/.dirstamp
 
 t/*.trs
 t/*log
