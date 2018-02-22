@@ -9,6 +9,7 @@ matrix:
             - iptables-dev
             - gcc-5
             - uuid-dev
+            - linux-headers-generic
       env:
          - MATRIX_EVAL="CC=gcc-5"
     - os: linux
@@ -20,6 +21,7 @@ matrix:
             - iptables-dev
             - gcc-6
             - uuid-dev
+            - linux-headers-generic
       env:
         - MATRIX_EVAL="CC=gcc-6"
     - os: linux
@@ -31,6 +33,7 @@ matrix:
             - iptables-dev
             - gcc-7
             - uuid-dev
+            - linux-headers-generic
       env:
         - MATRIX_EVAL="CC=gcc-7"
     - os: linux
@@ -42,6 +45,7 @@ matrix:
             - iptables-dev
             - clang-4.0
             - uuid-dev
+            - linux-headers-generic
       env:
         - MATRIX_EVAL="CC=clang-4.0"
     - os: linux
@@ -53,6 +57,7 @@ matrix:
             - iptables-dev
             - clang-5.0
             - uuid-dev
+            - linux-headers-generic
       env:
         - MATRIX_EVAL="CC=clang-5.0"
 before_install:
