@@ -2,76 +2,34 @@ matrix:
   include:
     - os: linux
       install:
-        - sudo apt-get install -y iptables-dev uuid-dev gcc-5
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - iptables-dev
-            - gcc-5
-            - uuid-dev
-            - linux-headers-generic
+        - sudo apt-get install -y gcc-5
       env:
          - MATRIX_EVAL="CC=gcc-5"
     - os: linux
       install:
-        - sudo apt-get install -y iptables-dev uuid-dev gcc-6
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - iptables-dev
-            - gcc-6
-            - uuid-dev
-            - linux-headers-generic
+        - sudo apt-get install -y gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6"
     - os: linux
       install:
-        - sudo apt-get install -y iptables-dev uuid-dev gcc-7
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - iptables-dev
-            - gcc-7
-            - uuid-dev
-            - linux-headers-generic
+        - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -qq
+        - sudo apt-get update -qq
+        - sudo apt-get install -y gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7"
     - os: linux
       install:
-        - sudo apt-get install -y iptables-dev uuid-dev clang-4.0
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-4.0
-          packages:
-            - iptables-dev
-            - clang-4.0
-            - uuid-dev
-            - linux-headers-generic
+        - sudo apt-get install -y clang-4.0
       env:
         - MATRIX_EVAL="CC=clang-4.0"
     - os: linux
       install:
-        - sudo apt-get install -y iptables-dev uuid-dev clang-5.0
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - iptables-dev
-            - clang-5.0
-            - uuid-dev
-            - linux-headers-generic
+        - sudo apt-get install -y clang-5.0
       env:
         - MATRIX_EVAL="CC=clang-5.0"
 before_install:
   - sudo apt-get update -qq
+  - sudo apt-get install -y iptables-dev uuid-dev
   - eval "${MATRIX_EVAL}"
 language: c
 dist: xenial
