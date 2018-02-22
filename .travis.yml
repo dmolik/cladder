@@ -63,7 +63,7 @@ matrix:
 before_install:
   - eval "${MATRIX_EVAL}"
 language: c
-dist: trusty
+dist: xenial
 sudo: required
 script:
   - export PATH="$PATH:${BUILD_PREFIX}/bin"
