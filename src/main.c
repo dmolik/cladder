@@ -26,25 +26,27 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/syscall.h>
-
-
 #include <sys/mount.h>
+
 #include <linux/loop.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
 
 #include <uuid/uuid.h>
 #define _GNU_SOURCE
 #include <sched.h>
 
-#include "src/deps/squashfs/squashfs_fs.h"
-#include "src/deps/squashfs/mksquashfs.h"
+
+/* project headers */
+#include <squashfs/squashfs_fs.h>
+#include <squashfs/mksquashfs.h>
+#include <net/cl.h>
 
 #define _DATA "/var/lib/cladder"
 #define pivot_root(new_root,put_old) syscall(SYS_pivot_root,new_root,put_old)

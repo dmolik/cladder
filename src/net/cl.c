@@ -38,7 +38,7 @@
 #include "nl.h"
 #include "namespace.h"
 
-#include "net.h"
+#include "cl.h"
 
 
 static unsigned int _avail_viface(void)

@@ -24,7 +24,8 @@ ACLOCAL_AMFLAGS = -I build
 AM_CFLAGS = -Wall -Wextra -g -std=gnu99 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
 	-D_LARGEFILE_SOURCE \
 	-DLZ4_SUPPORT -DXATTR_SUPPORT -DXATTR_DEFAULT $(DEPS_CFLAGS)
-AM_CPPFLAGS = -I$(top_srcdir)/src/deps/lz4 -I$(top_srcdir)/src/deps/squashfs
+AM_CPPFLAGS  = -I$(top_srcdir)/src/deps/lz4 -I$(top_srcdir)/src/deps/squashfs -I$(top_srcdir)/src/
+AM_CPPFLAGS += -I$(top_srcdir)/include -I$(top_srcdir)/src/deps
 
 core_headers :=
 core_headers += include/cladder.h
