@@ -12,9 +12,7 @@ matrix:
         - MATRIX_EVAL="CC=gcc-6"
     - os: linux
       install:
-        - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -qq
-        - sudo apt-get update -qq
-        - sudo apt-get install -y gcc-7
+        - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -qq && sudo apt-get update -qq && sudo apt-get install -y gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7"
     - os: linux
@@ -28,8 +26,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0"
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y iptables-dev uuid-dev
+  - sudo apt-get update -qq && sudo apt-get install -y iptables-dev uuid-dev
   - eval "${MATRIX_EVAL}"
 language: c
 dist: xenial
