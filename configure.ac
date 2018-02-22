@@ -21,7 +21,7 @@
 AC_PREREQ(2.59)
 AC_INIT([cladder], [0.0.2], [dan@danmolik.com], , [https://github.com/GrayTShirt/cladder/])
 
-AC_CONFIG_SRCDIR([include/cladder.h])
+AC_CONFIG_SRCDIR([src/cladder.h])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_MACRO_DIR([build])
 AC_CONFIG_HEADERS(config.h)

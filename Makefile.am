@@ -24,12 +24,12 @@ ACLOCAL_AMFLAGS = -I build
 AM_CFLAGS = -Wall -Wextra -g -std=gnu99 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
 	-D_LARGEFILE_SOURCE -DCOMP_DEFAULT=\"lz4\" \
 	-DLZ4_SUPPORT -DXATTR_SUPPORT -DXATTR_DEFAULT $(DEPS_CFLAGS)
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src/squashfs
+AM_CPPFLAGS = -I$(top_srcdir)/src/lz4 -I$(top_srcdir)/src/squashfs
 
 core_headers :=
-core_headers += include/cladder.h
+core_headers += src/cladder.h
 
-lz4_headers = include/lz4.h include/lz4opt.h include/lz4hc.h
+lz4_headers = src/lz4/lz4.h src/lz4/lz4opt.h src/lz4/lz4hc.h
 lz4_src     = src/lz4/lz4.c
 lz4hc_src   = $(lz4_src) src/lz4/lz4hc.c
 
@@ -48,7 +48,7 @@ core_src :=
 core_src += src/main.c
 
 
-include_HEADERS = include/cladder.h $(lz4_headers)
+include_HEADERS = src/cladder.h $(lz4_headers)
 cladder_SOURCES = $(core_headers) $(lz4hc_src) $(squashfs_src) $(core_src)
 cladder_LDADD   = -lpthread -lm -luuid
 bin_PROGRAMS    = cladder
