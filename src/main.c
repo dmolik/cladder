@@ -120,7 +120,7 @@ static int init(void *arg)
 	char **envp;
 	envp = malloc(sizeof(char *));
 	envp[0] = malloc(32);
-	envp[0] = "PATH=/bin";
+	envp[0] = "PATH=/bin:/sbin:/usr/bin:/usr/sbin";
 	envp[1] = malloc(32);
 	strcpy(envp[1], term);
 	envp[2] = malloc(2);

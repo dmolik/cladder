@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TITLE="Shitty Manual"
+TITLE="Cladder Manual"
 DATE=$(date +'%Y-%m-%d')
 VERSION=$2
 POD=$1
@@ -9,5 +9,5 @@ SECTION=${POD%.pod}; SECTION=${SECTION##*.}
 NAME=${POD%%.*}; NAME=${NAME##*/}; NAME=$(echo $NAME | dd conv=ucase 2>/dev/null)
 
 echo >&2 "[POD] $POD -> $NAME($SECTION) v$VERSION"
-pod2man --center "$TITLE" --date "$DATE" --release "Shitty v$VERSION" --name "$NAME" --section "$SECTION" $POD
+pod2man --center "$TITLE" --date "$DATE" --release "Cladder v$VERSION" --name "$NAME" --section "$SECTION" $POD
 rm -f man/*.tmp

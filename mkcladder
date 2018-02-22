@@ -1,0 +1,39 @@
+#!/bin/bash
+
+function copy()
+{
+	cp -f $1 ${1#"/"}
+}
+
+function copy_bin()
+{
+	path=$(which $1)
+	copy $path
+	libs=$(ldd $path | awk '$0 ~ "linux-vdso" {next} $0 ~ "=>" {print $3; next} {print $1}')
+	for i in $libs ; do
+		copy $i
+	done
+}
+
+mkdir $1
+cd $1
+mkdir {bin,sbin,lib64,etc}
+mkdir -p usr/share/terminfo/x
+cp /usr/share/terminfo/x/{xterm,xterm-256color} usr/share/terminfo/x
+
+echo "= ClADDER CONTAINER =
+
+  $1
+" > etc/motd
+
+echo "#!/bin/sh
+
+cat /etc/motd
+
+/bin/bash" > sbin/init
+chmod +x sbin/init
+
+copy_bin "bash"
+copy_bin "cat"
+copy_bin "echo"
+copy_bin "sh"
