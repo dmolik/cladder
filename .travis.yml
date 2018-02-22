@@ -1,6 +1,10 @@
 matrix:
   include:
     - os: linux
+      install:
+        - sudo apt-get install -qq iptables-dev uuid-dev gcc-5
+        - gcc-5
+        - uuid-dev
       addons:
         apt:
           sources:
@@ -61,6 +65,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0"
 before_install:
+  - sudo apt-get update -qq
   - eval "${MATRIX_EVAL}"
 language: c
 dist: xenial
