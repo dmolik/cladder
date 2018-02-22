@@ -1,7 +1,5 @@
 # Cladder
 
-[![Build Status](https://travis-ci.org/GrayTShirt/cladder.svg?branch=master)](https://travis-ci.org/GrayTShirt/cladder)
-
 A proof of concept utility that takes two arguments, a source directory and a destination directory.
 
 The src directory is turned into a lz4-squashfs archive and then mounted onto a destination directory
