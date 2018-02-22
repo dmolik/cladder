@@ -60,7 +60,7 @@ check_SCRIPTS = t/01-full.sh
 TESTS = $(check_SCRIPTS)
 dist_check_SCRIPTS=$(check_SCRIPTS) t/run t/lib.sh
 
-EXTRA_DIST = Changelog README.md COPYING
+EXTRA_DIST = Changelog README.md COPYING mkcontainer.sh
 
 man/%.1: man/%.1.pod
 	./man/build $< @PACKAGE_VERSION@ > $@
