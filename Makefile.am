@@ -24,7 +24,7 @@ ACLOCAL_AMFLAGS = -I build
 AM_CFLAGS = -Wall -Wextra -g -std=gnu99 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
 	-D_LARGEFILE_SOURCE \
 	-DLZ4_SUPPORT -DXATTR_SUPPORT -DXATTR_DEFAULT $(DEPS_CFLAGS)
-AM_CPPFLAGS = -I$(top_srcdir)/src/lz4 -I$(top_srcdir)/src/squashfs
+AM_CPPFLAGS = -I$(top_srcdir)/src/lz4 -I$(top_srcdir)/src
 
 core_headers :=
 core_headers += src/cladder.h
@@ -45,8 +45,8 @@ squashfs_src += src/squashfs/pseudo.h  src/squashfs/read_fs.c src/squashfs/read_
 squashfs_src += src/squashfs/sort.h  src/squashfs/xattr.h src/squashfs/xattr.c
 
 core_src :=
-core_src += src/net/namespace.h src/net/namespace.h
-core_src += src/net/fw.h        src/net/fw.h
+core_src += src/net/namespace.h src/net/namespace.c
+core_src += src/net/fw.h        src/net/fw.c
 core_src += src/net/nl.h        src/net/nl.c
 core_src += src/net/cl.h        src/net/cl.c
 core_src += src/main.c

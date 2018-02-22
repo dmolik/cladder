@@ -39,13 +39,13 @@
 #include <linux/loop.h>
 
 #include <uuid/uuid.h>
-#define _GNU_SOURCE
 #include <sched.h>
 
 
 /* project headers */
 #include <squashfs/squashfs_fs.h>
 #include <squashfs/mksquashfs.h>
+
 #include <net/cl.h>
 
 #define _DATA "/var/lib/cladder"
