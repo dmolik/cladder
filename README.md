@@ -20,8 +20,8 @@ A possible use is to download a source code repo and then build it, and throw aw
 
 ## Compiling
 
-    v=$(curl 'https://api.github.com/repos/graytshirt/cladder/tags' 2>&1 | awk '/name/{print $2;}' | sed -e 's/"//g' -e 's/,$//')
-    curl -L https://github.com/GrayTShirt/cladder/releases/download/${v}/cladder-${v#v}.tar.gz | tar x - 
+    v=$(curl 'https://api.github.com/repos/whisperos/cladder/tags' 2>&1 | awk '/name/{print $2;}' | sed -e 's/"//g' -e 's/,$//')
+    curl -L https://github.com/whisperos/cladder/releases/download/${v}/cladder-${v#v}.tar.gz | tar x - 
     cd cladder-${v#v}
     ./configure --prefix=/usr CFLAGS="-march=native -mtune=native -O2"
     make
