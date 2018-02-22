@@ -12,7 +12,7 @@ matrix:
         - MATRIX_EVAL="CC=gcc-6"
     - os: linux
       install:
-        - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -qq && sudo apt-get update -qq && sudo apt-get install -y iptables-dev uuid-dev gcc-7
+        - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && sudo apt-get update -qq && sudo apt-get install -y iptables-dev uuid-dev gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7"
     - os: linux
