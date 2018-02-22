@@ -6,6 +6,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - iptables-dev
             - gcc-5
             - uuid-dev
       env:
@@ -16,6 +17,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - iptables-dev
             - gcc-6
             - uuid-dev
       env:
@@ -26,6 +28,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
+            - iptables-dev
             - gcc-7
             - uuid-dev
       env:
@@ -36,6 +39,7 @@ matrix:
           sources:
             - llvm-toolchain-trusty-4.0
           packages:
+            - iptables-dev
             - clang-4.0
             - uuid-dev
       env:
@@ -46,6 +50,7 @@ matrix:
           sources:
             - llvm-toolchain-trusty-5.0
           packages:
+            - iptables-dev
             - clang-5.0
             - uuid-dev
       env:
