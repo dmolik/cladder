@@ -17,8 +17,7 @@ function copy_bin()
 
 mkdir $1
 cd $1
-mkdir {bin,sbin,lib64,etc}
-mkdir -p usr/share/terminfo/x
+mkdir -p {bin,sbin,lib64,etc,usr/lib64,usr/bin,usr/share/terminfo/x}
 cp /usr/share/terminfo/x/{xterm,xterm-256color} usr/share/terminfo/x
 
 echo "= ClADDER CONTAINER =
@@ -33,6 +32,8 @@ cat /etc/motd
 /bin/bash" > sbin/init
 chmod +x sbin/init
 
+copy "/etc/resolv.conf"
+copy_bin "curl"
 copy_bin "bash"
 copy_bin "cat"
 copy_bin "echo"
