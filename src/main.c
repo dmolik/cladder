@@ -171,7 +171,7 @@ static int init(void *arg)
 		return 1;
 	}
 	cap_free(caps);
-	unshare(CLONE_NEWUSER);
+	//unshare(CLONE_NEWUSER);
 	return execve(args[0], &args[0], envp);
 }
 
@@ -337,8 +337,8 @@ int main (int argc, char *argv[])
 
 	pid_t pid, w;
 	int wstatus;
-	char *stack     = malloc(1024 * 1024 * 32);
-	char *stack_top = stack + 1024 * 1024 * 32; // counting on order of operations
+	char *stack     = malloc(1024 * 1024 * 64);
+	char *stack_top = stack + 1024 * 1024 * 64; // counting on order of operations
 	// pid = clone(init, stack_top, CLONE_NEWPID|CLONE_NEWUSER, NULL);
 	if ((pid = clone(init, stack_top, CLONE_NEWPID|SIGCHLD, id)) == -1) {
 		fprintf(stderr, "clone failed [%s]\n", strerror(errno));

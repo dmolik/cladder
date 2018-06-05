@@ -33,6 +33,27 @@ cat /etc/motd
 chmod +x sbin/init
 
 copy "/etc/resolv.conf"
+copy "/lib64/libnss_files.so.2"
+copy "/lib64/libnss_dns.so.2"
+echo "root:x:0:0:root:/root:/bin/bash" > etc/passwd
+echo "
+passwd:      compat files
+shadow:      compat files
+group:       compat files
+
+hosts:       files dns
+networks:    files dns
+
+services:    db files
+protocols:   db files
+rpc:         db files
+ethers:      db files
+netmasks:    files
+netgroup:    files
+bootparams:  files
+
+automount:   files
+aliases:     files" > etc/nsswitch.conf
 copy_bin "curl"
 copy_bin "bash"
 copy_bin "cat"
@@ -41,5 +62,7 @@ copy_bin "sh"
 copy_bin "ls"
 copy_bin "tree"
 copy_bin "du"
+copy_bin "ping"
 copy_bin "df"
 copy_bin "htop"
+copy_bin "strace"
