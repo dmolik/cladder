@@ -37,6 +37,9 @@
 #include <sys/mount.h>
 
 #include <linux/loop.h>
+#include <sys/capability.h>
+#include <linux/capability.h>
+#include <sys/prctl.h>
 
 #include <uuid/uuid.h>
 #include <sched.h>
@@ -130,6 +133,44 @@ static int init(void *arg)
 	if (mount("proc", "/proc", "proc",  0, NULL) != 0) {
 		fprintf(stderr, "failed to mount proc [%s]\n", strerror(errno));
 	}
+	int drop_caps[] = {
+		CAP_AUDIT_CONTROL,
+		CAP_AUDIT_READ,
+		CAP_AUDIT_WRITE,
+		CAP_BLOCK_SUSPEND,
+		CAP_DAC_READ_SEARCH,
+		CAP_FSETID,
+		CAP_IPC_LOCK,
+		CAP_MAC_ADMIN,
+		CAP_MAC_OVERRIDE,
+		CAP_MKNOD,
+		CAP_SETFCAP,
+		CAP_SYSLOG,
+		CAP_SYS_ADMIN,
+		CAP_SYS_BOOT,
+		CAP_SYS_MODULE,
+		CAP_SYS_NICE,
+		CAP_SYS_RAWIO,
+		CAP_SYS_RESOURCE,
+		CAP_SYS_TIME,
+		CAP_WAKE_ALARM
+	};
+	size_t num_caps = sizeof(drop_caps) / sizeof(*drop_caps);
+	for (size_t i = 0; i < num_caps; i++) {
+		if (prctl(PR_CAPBSET_DROP, drop_caps[i], 0, 0, 0)) {
+			fprintf(stderr, "prctl failed: %m\n");
+			return 1;
+		}
+	}
+	cap_t caps = NULL;
+	if (!(caps = cap_get_proc())
+			|| cap_set_flag(caps, CAP_INHERITABLE, num_caps, drop_caps, CAP_CLEAR)
+			|| cap_set_proc(caps)) {
+		fprintf(stderr, "failed: %m\n");
+		if (caps) cap_free(caps);
+		return 1;
+	}
+	cap_free(caps);
 	unshare(CLONE_NEWUSER);
 	return execve(args[0], &args[0], envp);
 }
@@ -202,7 +243,7 @@ int main (int argc, char *argv[])
 	}
 
 	char *u_opt = malloc(64);
-	sprintf(u_opt, "size=134217728,mode=0750,uid=%d", uid);
+	sprintf(u_opt, "size=268435456,mode=0750,uid=%d", uid);
 	_mnt("tmpfs", "wrk", "tmpfs", 0, u_opt);
 	free(u_opt);
 

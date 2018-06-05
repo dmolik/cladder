@@ -20,7 +20,7 @@ cd $1
 mkdir -p {bin,sbin,lib64,etc,usr/lib64,usr/bin,usr/share/terminfo/x}
 cp /usr/share/terminfo/x/{xterm,xterm-256color} usr/share/terminfo/x
 
-echo "= ClADDER CONTAINER =
+echo "= CLADDER CONTAINER =
 
   $1
 " > etc/motd
@@ -38,3 +38,8 @@ copy_bin "bash"
 copy_bin "cat"
 copy_bin "echo"
 copy_bin "sh"
+copy_bin "ls"
+copy_bin "tree"
+copy_bin "du"
+copy_bin "df"
+copy_bin "htop"
