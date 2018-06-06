@@ -29,12 +29,15 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <grp.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/syscall.h>
 #include <sys/mount.h>
+
+#include <sys/socket.h>
 
 #include <linux/loop.h>
 #include <sys/capability.h>
@@ -51,22 +54,32 @@
 
 #include <net/cl.h>
 
+#define USERNS_OFFSET 65534
+#define USERNS_COUNT 10
 #define _DATA "/var/lib/cladder"
 #define pivot_root(new_root,put_old) syscall(SYS_pivot_root,new_root,put_old)
 
 
 char  *_wrk = NULL;
-char   id[37];
 uid_t  uid;
 struct passwd *pwd;
 
-void _mkpnt(char *pnt)
+typedef struct {
+	int argc;
+	char id[37];
+	uid_t uid;
+	int fd;
+	char **argv;
+	char *mount_dir;
+} config_t;
+
+void _mkpnt(char *pnt, char *id)
 {
 	char   *tmp = malloc(64);
 	struct  stat sb;
 	if (_wrk == NULL) {
 		_wrk = malloc(64);
-		sprintf(_wrk, "/var/lib/cladder/%s", id);
+		sprintf(_wrk, "%s/%s", _DATA, id);
 		if (stat(_DATA, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
 			unlink(_DATA);
 			if (mkdir(_DATA, S_IFDIR|S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH) != 0) {
@@ -112,14 +125,12 @@ void _mnt(char *src, char *dst, char *type, int flags, char *opts)
 
 static int init(void *arg)
 {
-	if (arg != NULL)
-		fprintf(stderr, "arg is not null\n");
-	if (sethostname(arg, strlen(arg)) != 0)
+	config_t *config = arg;
+	if (sethostname(config->id, strlen(config->id)) != 0)
 		fprintf(stderr, "failed to set hostname to %s, [%s]\n", (char *)arg, strerror(errno));
 	char *args[] = { "/sbin/init", 0 };
 	char *term   = malloc(32);
 	sprintf(term, "TERM=%s", getenv("TERM"));
-	printf("term: %s\n", term);
 	char **envp;
 	envp = malloc(sizeof(char *));
 	envp[0] = malloc(32);
@@ -128,11 +139,47 @@ static int init(void *arg)
 	strcpy(envp[1], term);
 	envp[2] = malloc(2);
 	envp[2] = 0;
-
 	free(term);
+
+	DIR *d;
+	struct dirent *dir;
+	d = opendir("/");
+	if (d) {
+		while ((dir = readdir(d)) != NULL)
+			printf("%s\n", dir->d_name);
+		closedir(d);
+	}
+	printf("uid: %d, euid: %d\n", getuid(), geteuid());
 	if (mount("proc", "/proc", "proc",  0, NULL) != 0) {
 		fprintf(stderr, "failed to mount proc [%s]\n", strerror(errno));
 	}
+	int has_userns = !unshare(CLONE_NEWUSER);
+	if (write(config->fd, &has_userns, sizeof(has_userns)) != sizeof(has_userns)) {
+		fprintf(stderr, "couldn't write: %m\n");
+		return -1;
+	}
+	int result = 0;
+	if (read(config->fd, &result, sizeof(result)) != sizeof(result)) {
+		fprintf(stderr, "couldn't read: %m\n");
+		return -1;
+	}
+	if (result) return -1;
+	printf("uid: %d, euid: %d\n", getuid(), geteuid());
+	if (setgroups(1, & (gid_t) { config->uid }) ||
+		setresgid(config->uid, config->uid, config->uid) ||
+		setresuid(config->uid, config->uid, config->uid)) {
+		fprintf(stderr, "%m\n");
+		return -1;
+	}
+	printf("uid: %d, euid: %d\n", getuid(), geteuid());
+	d = opendir("/");
+	if (d) {
+		while ((dir = readdir(d)) != NULL)
+			printf("%s\n", dir->d_name);
+		closedir(d);
+	}
+	return execve(args[0], &args[0], envp);
+
 	int drop_caps[] = {
 		CAP_AUDIT_CONTROL,
 		CAP_AUDIT_READ,
@@ -171,7 +218,7 @@ static int init(void *arg)
 		return 1;
 	}
 	cap_free(caps);
-	//unshare(CLONE_NEWUSER);
+
 	return execve(args[0], &args[0], envp);
 }
 
@@ -219,19 +266,21 @@ int main (int argc, char *argv[])
 		printf("please provide a src, see -? for more information\n");
 		exit(1);
 	}
+	config_t config = {0};
 	uuid_t uuid;
 	uuid_generate(uuid);
-	uuid_unparse_lower(uuid, id);
+	uuid_unparse_lower(uuid, config.id);
 
 	pwd = getpwnam(getenv("SUDO_USER"));
 	if (pwd == NULL) {
 		fprintf(stderr, "not running as sudo\n");
 		exit(1);
 	}
+	pwd = getpwnam("root");
 	uid = pwd->pw_uid;
-	_mkpnt("wrk");
-	_mkpnt("sqsh");
-	_mkpnt("root");
+	_mkpnt("wrk", config.id);
+	_mkpnt("sqsh", config.id);
+	_mkpnt("root", config.id);
 
 	char *squashed = malloc(256);
 	sprintf(squashed, "%s/%s.sqsh", _wrk, argv[1]);
@@ -243,12 +292,12 @@ int main (int argc, char *argv[])
 	}
 
 	char *u_opt = malloc(64);
-	sprintf(u_opt, "size=268435456,mode=0750,uid=%d", uid);
+	sprintf(u_opt, "size=268435456,mode=0777,uid=%d", uid);
 	_mnt("tmpfs", "wrk", "tmpfs", 0, u_opt);
 	free(u_opt);
 
-	_mkpnt("wrk/up");
-	_mkpnt("wrk/work");
+	_mkpnt("wrk/up", config.id);
+	_mkpnt("wrk/work", config.id);
 
 	int   file_fd, device_fd, loop_ctl;
 	long  dev_num;
@@ -307,11 +356,11 @@ int main (int argc, char *argv[])
 	_mnt("overlay", "root", "overlay", 0, tree);
 	free(tree);
 
-	_mkpnt("root/proc");
-	_mkpnt("root/dev");
-	_mkpnt("root/sys");
-	_mkpnt("root/tmp");
-	_mkpnt("root/old");
+	_mkpnt("root/proc", config.id);
+	_mkpnt("root/dev",  config.id);
+	_mkpnt("root/sys",  config.id);
+	_mkpnt("root/tmp",  config.id);
+	_mkpnt("root/old",  config.id);
 	//_mnt("proc", "root/proc", "proc",  0,       NULL);
 	_mnt("sys",  "root/sys",  "sysfs", 0,       NULL);
 	_mnt("/dev", "root/dev",  "none",  MS_BIND, NULL);
@@ -337,12 +386,59 @@ int main (int argc, char *argv[])
 
 	pid_t pid, w;
 	int wstatus;
+	int sockets[2] = {0};
 	char *stack     = malloc(1024 * 1024 * 64);
-	char *stack_top = stack + 1024 * 1024 * 64; // counting on order of operations
+	char *stack_top = stack + 1024 * 1024 * 64;
 	// pid = clone(init, stack_top, CLONE_NEWPID|CLONE_NEWUSER, NULL);
-	if ((pid = clone(init, stack_top, CLONE_NEWPID|SIGCHLD, id)) == -1) {
+	if (socketpair(AF_LOCAL, SOCK_SEQPACKET, 0, sockets)) {
+		fprintf(stderr, "socketpair failed: %m\n");
+		//goto error;
+	}
+	if (fcntl(sockets[0], F_SETFD, FD_CLOEXEC)) {
+		fprintf(stderr, "fcntl failed: %m\n");
+		//goto error;
+	}
+	config.fd = sockets[1];
+	if (mount("proc", "/proc", "proc",  0, NULL) != 0) {
+		fprintf(stderr, "failed to mount proc [%s]\n", strerror(errno));
+	}
+	if ((pid = clone(init, stack_top, CLONE_NEWNS|CLONE_NEWPID|SIGCHLD, &config)) == -1) {
 		fprintf(stderr, "clone failed [%s]\n", strerror(errno));
 	}
+	close(sockets[1]);
+	sockets[1] = 0;
+	int uid_map = 0;
+	int has_userns = -1;
+	if (read(sockets[0], &has_userns, sizeof(has_userns)) != sizeof(has_userns)) {
+		fprintf(stderr, "couldn't read from child!\n");
+		return -1;
+	}
+	if (has_userns) {
+		char path[PATH_MAX] = {0};
+		for (char **file = (char *[]) { "uid_map", "gid_map", 0 }; *file; file++) {
+			if (snprintf(path, sizeof(path), "/proc/%d/%s", pid, *file)
+			    > sizeof(path)) {
+				fprintf(stderr, "snprintf too big? %m\n");
+				return -1;
+			}
+			if ((uid_map = open(path, O_WRONLY)) == -1) {
+				fprintf(stderr, "open failed: %m\n");
+				return -1;
+			}
+			if (dprintf(uid_map, "0 %d %d\n", getuid(), USERNS_COUNT) == -1) {
+				fprintf(stderr, "dprintf failed: %m\n");
+				close(uid_map);
+				return -1;
+			}
+			close(uid_map);
+		}
+	}
+	if (write(sockets[0], & (int) { 0 }, sizeof(int)) != sizeof(int)) {
+		fprintf(stderr, "couldn't write: %m\n");
+		return -1;
+	}
+	close(sockets[0]);
+	sockets[0] = 0;
 	do {
 		w = waitpid(pid, &wstatus, WUNTRACED | WCONTINUED);
 		if (w == -1)
